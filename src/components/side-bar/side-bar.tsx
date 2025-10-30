@@ -23,7 +23,6 @@ import { FcAbout, } from "react-icons/fc";
 import { AiOutlineMenu } from 'react-icons/ai'
 import Avatar from '@mui/material/Avatar';
 import { UserContext } from '../../utils/contextApi';
-import Button from '@mui/material/Button';
 import type { CheckAuthRole } from '../../utils/types/checkAuthType';
 import Tooltip from '@mui/material/Tooltip';
 
@@ -75,27 +74,29 @@ export default function ResponsiveDrawer(props: Props) {
             <Divider />
             <List>
                 {['DashBoard', 'Teacher', 'Assignments', 'Setting and Profile'].map((text, index) => (
-                    <Link to={text == "DashBoard" ? "/" : text} key={index}>
-                        <ListItem key={text} disablePadding>
-                            <ListItemButton>
-                                <ListItemIcon>
-                                    {(index === 0)
-                                        ?
-                                        (<GoHome className='text-2xl' />)
-                                        :
-                                        (index == 1)
+                    <Link to={text == "DashBoard" ? "/" : text == "Setting and Profile" ? "setting-profile" : text} key={index}>
+                        <Tooltip title={text}>
+                            <ListItem key={text} disablePadding>
+                                <ListItemButton>
+                                    <ListItemIcon>
+                                        {(index === 0)
                                             ?
-                                            (<MdOutlineClass className='text-2xl' />)
+                                            (<GoHome className='text-2xl' />)
                                             :
-                                            (index == 2)
+                                            (index == 1)
                                                 ?
-                                                (<PiStudentBold className='text-2xl' />)
+                                                (<MdOutlineClass className='text-2xl' />)
                                                 :
-                                                (<IoSettingsOutline className='text-2xl' />)}
-                                </ListItemIcon>
-                                <ListItemText primary={text} />
-                            </ListItemButton>
-                        </ListItem>
+                                                (index == 2)
+                                                    ?
+                                                    (<PiStudentBold className='text-2xl' />)
+                                                    :
+                                                    (<IoSettingsOutline className='text-2xl' />)}
+                                    </ListItemIcon>
+                                    <ListItemText primary={text} />
+                                </ListItemButton>
+                            </ListItem>
+                        </Tooltip>
                     </Link>
                 ))}
             </List>
@@ -124,25 +125,27 @@ export default function ResponsiveDrawer(props: Props) {
                         </ListItem>
                     </Link>
                 ))}
-                {context && ['Events', 'Billing', 'About Us'].map((text, index) => (
+                {isRoleAdminOrStudent == "Admin" && ["add-student"].map((text, index) => (
                     <Link to={text} key={index}>
-                        <ListItem key={text} disablePadding>
-                            <ListItemButton>
-                                <ListItemIcon>
-                                    {(index === 0)
-                                        ?
-                                        (<MdOutlineEmojiEvents className='text-2xl' />)
-                                        :
-                                        (index == 1)
+                        <Tooltip title={text}>
+                            <ListItem key={text} disablePadding>
+                                <ListItemButton>
+                                    <ListItemIcon>
+                                        {(index === 0)
                                             ?
-                                            (<RiBillLine className='text-2xl' />)
+                                            (<PiStudentBold className='text-2xl' />)
                                             :
-                                            (<FcAbout className='text-2xl' />)
-                                    }
-                                </ListItemIcon>
-                                <ListItemText primary={text} />
-                            </ListItemButton>
-                        </ListItem>
+                                            (index == 1)
+                                                ?
+                                                (<RiBillLine className='text-2xl' />)
+                                                :
+                                                (<FcAbout className='text-2xl' />)
+                                        }
+                                    </ListItemIcon>
+                                    <ListItemText primary={text} />
+                                </ListItemButton>
+                            </ListItem>
+                        </Tooltip>
                     </Link>
                 ))}
             </List>
@@ -154,7 +157,7 @@ export default function ResponsiveDrawer(props: Props) {
     return (
         <>
             <Box sx={{
-                display:document.getElementsByTagName("body")[0].clientWidth > 600 ? "flex" : "",
+                display: document.getElementsByTagName("body")[0].clientWidth > 600 ? "flex" : "",
             }}>
                 <IconButton
                     className='fixed top-4 left-4'

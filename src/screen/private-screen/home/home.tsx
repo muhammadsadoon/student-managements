@@ -31,13 +31,13 @@ const HomeScreen = () => {
                 <div className='md:p-6'>
                     <p className='md:text-2xl'>Uyo/school/@teachable.com</p>
                 </div>
-                <Link to={"/add-admin"}>
+                <Link to={"/teacher"}>
                     <div className='md:p-6 my-1 flex flex-col md:flex-row items-center justify-center'>
                         <div className='flex items-center justify-center md:w-1/4 w-full md:rounded-bl-xl md:rounded-tl-xl md:rounded-tr-none rounded-tl-xl rounded-tr-xl  bg-sky-200 h-15 md:h-20'>
                             <RiAdminLine className='text-2xl' />
                         </div>
                         <div className='flex flex-col items-start justify-center p-4 md:rounded-br-xl md:rounded-tr-xl md:rounded-bl-none rounded-bl-xl rounded-br-xl border border-t-0 md:border-t  md:border-l-0 md:h-20'>
-                            <h1 className='text-xl'>Add other admins</h1>
+                            <h1 className='text-xl'>See your teacher profile</h1>
                             <p className='text-sm text-gray-700'>Create rich course content and coaching products for your students.
                                 When you give them a pricing plan, they’ll appear on your site!</p>
                         </div>

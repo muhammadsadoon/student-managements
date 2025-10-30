@@ -7,9 +7,10 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import type { TableSearchType } from '../../utils/types/propes';
+import type { TableSearchType, TeacherGettingDataType } from '../../utils/types/propes';
 import { UserContext } from '../../utils/contextApi';
 import { useFetchSupabase } from '../../hooks/useFetch';
+import Skeleton from '@mui/material/Skeleton';
 
 function createData(
     name: string,
@@ -31,49 +32,71 @@ const rows = [
 
 
 export default function TableComponent({ search }: TableSearchType) {
-    const [user, setUser] = React.useState(rows);
-    const [arr, setArr] = React.useState<TableSearchType[]>([]);
+    const [arr, setArr] = React.useState<TeacherGettingDataType[]>([]);
+    const [fetchingErr, setFetchError] = React.useState<boolean>(false);
+
     const getData = async () => {
-        const {data,error}:any = await useFetchSupabase("teacher");
-        setArr(data)
-        if(error) console.log("fetching error from supabase: ",error?.massage)
+        try {
+            const { data, error }: any = await useFetchSupabase("teacher");
+            setArr(data)
+            if (error) {
+                console.log("fetching error from supabase: ", error?.massage)
+                throw "fetching error from supabase: " + error?.massage
+            }
+        } catch (err: any) {
+            setFetchError(err)
+        }
     }
     const context = React.useContext(UserContext);
-    
+    const filturData: TeacherGettingDataType[] = arr.filter(teacher => {
+        if (!search) return true;
+        return teacher?.name?.toLowerCase().includes(search.toLowerCase())
+    })
+
     React.useEffect(() => {
         getData()
-        console.log(arr)
     }, []);
 
-    return (
-        <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 450 }} aria-label="simple table">
-                <TableHead>
-                    <TableRow>
-                        <TableCell>Dessert (100g serving)</TableCell>
-                        <TableCell align="right">Calories</TableCell>
-                        <TableCell align="right">Fat&nbsp;(g)</TableCell>
-                        <TableCell align="right">Carbs&nbsp;(g)</TableCell>
-                        <TableCell align="right">Protein&nbsp;(g)</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {rows.map((row) => (
-                        <TableRow
-                            key={row.name}
-                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                        >
-                            <TableCell component="th" scope="row">
-                                {row.name}
-                            </TableCell>
-                            <TableCell align="right">{row.calories}</TableCell>
-                            <TableCell align="right">{row.fat}</TableCell>
-                            <TableCell align="right">{row.carbs}</TableCell>
-                            <TableCell align="right">{row.protein}</TableCell>
+    return (<>
+        {!arr && (<div className='flex h-32 w-full items-center justify-center'>
+            <Skeleton className='h-full w-full' />
+        </div>)}
+        {
+            arr && <TableContainer component={Paper}>
+                <Table sx={{ minWidth: 450 }} aria-label="simple table">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>Teacher Id</TableCell>
+                            <TableCell align="right">Name</TableCell>
+                            <TableCell align="right">Email</TableCell>
+                            <TableCell align="right">Number</TableCell>
+                            <TableCell align="right">Gender</TableCell>
+                            <TableCell align="right">Subject</TableCell>
                         </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-        </TableContainer>
+                    </TableHead>
+                    <TableBody>
+                        { }
+                        {filturData ? filturData.map((row) => (
+                            <TableRow
+                                key={row?.name}
+                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                            >
+                                <TableCell component="th" scope="row">
+                                    {row?.id}
+                                </TableCell>
+                                <TableCell align="right">{row?.name}</TableCell>
+                                <TableCell align="right">{row?.email}</TableCell>
+                                <TableCell align="right">0{row?.number}</TableCell>
+                                <TableCell align="right">{row?.gender ? "Male" : "Female"}</TableCell>
+                                <TableCell align="right">{row?.subject?.toUpperCase()}</TableCell>
+                            </TableRow>
+                        )) : (
+                            fetchingErr && <h1 className='text-center w-full'>The Teacher is not currently assigned</h1>
+                        )}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        }
+    </>
     );
 }
