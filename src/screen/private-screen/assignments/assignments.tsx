@@ -5,6 +5,7 @@ import { logoutFromSupabase } from '../../../utils/supabase-client';
 
 const AssignmentsComponents = () => {
   const [assignments, setAssignments] = useState(null);
+  
   const context = useContext(UserContext);
 
 

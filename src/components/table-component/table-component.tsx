@@ -11,6 +11,7 @@ import type { TableSearchType, TeacherGettingDataType } from '../../utils/types/
 import { UserContext } from '../../utils/contextApi';
 import { useFetchSupabase } from '../../hooks/useFetch';
 import Skeleton from '@mui/material/Skeleton';
+import { Link } from 'react-router-dom';
 
 function createData(
     name: string,
@@ -78,24 +79,58 @@ export default function TableComponent({ search }: TableSearchType) {
                         { }
                         {filturData ? filturData.map((row) => (
                             <TableRow
-                                key={row?.name}
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                key={row?.name}
                             >
                                 <TableCell component="th" scope="row">
-                                    {row?.id}
+                                    <Link
+                                        to={`/teacher/${row?.name}`}
+                                    >
+                                        {row?.id}
+                                    </Link>
                                 </TableCell>
-                                <TableCell align="right">{row?.name}</TableCell>
-                                <TableCell align="right">{row?.email}</TableCell>
-                                <TableCell align="right">0{row?.number}</TableCell>
-                                <TableCell align="right">{row?.gender ? "Male" : "Female"}</TableCell>
-                                <TableCell align="right">{row?.subject?.toUpperCase()}</TableCell>
+                                <TableCell align="right">
+                                    <Link
+                                        to={`/teacher/${row?.name}`}
+                                    >
+                                        {row?.name}
+                                    </Link>
+                                </TableCell>
+                                <TableCell align="right">
+                                    <Link
+                                        to={`/teacher/${row?.name}`}
+                                    >
+                                        {row?.email}
+                                    </Link>
+                                </TableCell>
+                                <TableCell align="right">
+                                    <Link
+                                        to={`/teacher/${row?.name}`}
+                                    >
+                                        0{row?.number}
+                                    </Link>
+                                </TableCell>
+                                <TableCell align="right">
+                                    <Link
+                                        to={`/teacher/${row?.name}`}
+                                    >
+                                        {row?.gender ? "Male" : "Female"}
+                                    </Link>
+                                </TableCell>
+                                <TableCell align="right">
+                                    <Link
+                                        to={`/teacher/${row?.name}`}
+                                    >
+                                        {row?.subject?.toUpperCase()}
+                                    </Link>
+                                </TableCell>
                             </TableRow>
                         )) : (
                             fetchingErr && <h1 className='text-center w-full'>The Teacher is not currently assigned</h1>
                         )}
                     </TableBody>
                 </Table>
-            </TableContainer>
+            </TableContainer >
         }
     </>
     );
