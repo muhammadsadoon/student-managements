@@ -1,12 +1,12 @@
-import { useContext, useState } from 'react'
-import { UserContext } from '../../../utils/contextApi'
+import { useState } from 'react'
+// import { UserContext } from '../../../utils/contextApi'
 import { MdNotificationsNone } from 'react-icons/md';
 import { logoutFromSupabase } from '../../../utils/supabase-client';
 
 const AssignmentsComponents = () => {
-  const [assignments, setAssignments] = useState(null);
+  const [assignments] = useState(null);
   
-  const context = useContext(UserContext);
+  // const context = useContext(UserContext);
 
 
   return (

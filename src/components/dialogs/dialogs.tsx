@@ -8,12 +8,8 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import type { GetChildrenTypeFromToParentComponentAdded } from '../../utils/types/propes';
 
-export default function DiaLogsFormsComponent({ children, isOpen }: GetChildrenTypeFromToParentComponentAdded) {
+export default function DiaLogsFormsComponent({ children }: GetChildrenTypeFromToParentComponentAdded) {
     const [open, setOpen] = React.useState(true);
-
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
 
     const handleClose = () => {
         setOpen(false);

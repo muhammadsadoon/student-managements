@@ -1,7 +1,5 @@
 "use client"
-import * as React from 'react';
-import type { TableSearchType, TeacherGettingDataType } from '../../utils/types/propes';
-import { useFetchSupabase } from '../../hooks/useFetch';
+import type { TeacherGettingDataType } from '../../utils/types/propes';
 import TradeCard from '../trade-card/trade-card';
 
 
@@ -12,12 +10,12 @@ export default function SearchTeacherByStudent({ arr }: { arr: TeacherGettingDat
         <div className='flex gap-3 flex-wrap'>
             {!arr ? "" : (arr?.map((item, index) => {
                 // if (index === 0) {
-                    return (
-                        <div key={index} >
-                            <TradeCard data={item}/>
-                        </div>
-                    )
-                }
+                return (
+                    <div key={index} >
+                        <TradeCard data={item} />
+                    </div>
+                )
+            }
             )
             )}
         </div>

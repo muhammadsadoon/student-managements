@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { MdNotificationsNone } from 'react-icons/md'
 import { Link, useParams } from 'react-router-dom'
 import { logoutFromSupabase } from '../../../utils/supabase-client'

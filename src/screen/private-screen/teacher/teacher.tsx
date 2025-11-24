@@ -8,7 +8,6 @@ import type { TeacherGettingDataType } from '../../../utils/types/propes';
 import { useFetchSupabase, useInsertSupabase } from '../../../hooks/useFetch';
 import DiaLogsFormsComponent from '../../../components/dialogs/dialogs';
 import { logoutFromSupabase } from '../../../utils/supabase-client';
-import type { FromDataTypeForSendFormToSupabase } from '../../../utils/types/checkAuthType';
 import AlertBox from '../../../components/alert-box/alert-box';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,12 +15,14 @@ const TeacherScreen = () => {
     const [searchInput, setSearchInput] = useState("");
     const [arr, setArr] = useState<TeacherGettingDataType[]>([]);
     const [showForm, setShowForm] = useState(false)
-    const [name,setName] = useState<String>("")
-    const [email,setEmail] = useState<String>("")
-    const [number,setNumber] = useState<String>("")
-    const [image_url,setImage_url] = useState<String>("")
-    const [subject,setSubject] = useState<String>("")
-    const [gender,setGender] = useState<boolean>()
+    const [name, setName] = useState<string>("")
+    const [email, setEmail] = useState<string>("")
+    const [number, setNumber] = useState<string>("")
+    const [image_url, setImage_url] = useState<string>("")
+    const [subject, setSubject] = useState<string>("")
+    const [gender, setGender] = useState<boolean | undefined>(undefined)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [errors, setErrors] = useState<Record<string, string | undefined>>({})
     const context = useContext(UserContext);
 
     const navigate = useNavigate();
@@ -43,51 +44,54 @@ const TeacherScreen = () => {
     }
 
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+        setIsSubmitting(true);
+        setErrors({});
+
         try {
-            const nameStr = String(name ?? "").trim();
-            const emailStr = String(email ?? "").trim();
-            const numberStr = String(number ?? "").trim();
-            const subjectStr = String(subject ?? "").trim();
-            const imageUrlStr = String(image_url ?? "").trim();
-            const genderStr = String(gender ?? "").trim();
+            const nameStr = (name ?? "").trim();
+            const emailStr = (email ?? "").trim();
+            const numberStr = (number ?? "").trim();
+            const subjectStr = (subject ?? "").trim();
+            const imageUrlStr = (image_url ?? "").trim();
+            const genderStr = gender === undefined ? "" : String(gender);
 
-            const errors: string[] = [];
+            const errorsMap: Record<string, string> = {};
 
-            if (!nameStr) errors.push("Name is required.");
-            else if (nameStr.length < 8) errors.push("Name must be at least 8 characters.");
+            if (!nameStr) errorsMap.name = "Name is required.";
+            else if (nameStr.length < 8) errorsMap.name = "Name must be at least 8 characters.";
 
-            if (!emailStr) errors.push("Email is required.");
-            else if (!/^\S+@\S+\.\S+$/.test(emailStr)) errors.push("Email is not valid.");
+            if (!emailStr) errorsMap.email = "Email is required.";
+            else if (!/^\S+@\S+\.\S+$/.test(emailStr)) errorsMap.email = "Email is not valid.";
 
-            if (!numberStr) errors.push("Number is required.");
-            else if (!/^\d{7,15}$/.test(numberStr)) errors.push("Number must be 7 to 15 digits.");
+            if (!numberStr) errorsMap.number = "Number is required.";
+            else if (!/^\d{7,15}$/.test(numberStr)) errorsMap.number = "Number must be 7 to 15 digits.";
 
-            if (!subjectStr) errors.push("Subject is required.");
+            if (!subjectStr) errorsMap.subject = "Subject is required.";
 
             if (!imageUrlStr) {
-                errors.push("Image URL is required.");
+                errorsMap.image_url = "Image URL is required.";
             } else {
                 try {
-                    // basic URL validation
                     new URL(imageUrlStr);
                 } catch {
-                    errors.push("Image URL is not a valid URL.");
+                    errorsMap.image_url = "Image URL is not a valid URL.";
                 }
             }
 
-            if (!(genderStr === "true" || genderStr === "false")) errors.push("Gender must be selected.");
+            if (!(genderStr === "true" || genderStr === "false")) errorsMap.gender = "Gender must be selected.";
 
-            if (errors.length > 0) {
+            if (Object.keys(errorsMap).length > 0) {
+                setErrors(errorsMap);
                 AlertBox({
-                    text: errors.join("\n"),
+                    text: Object.values(errorsMap).join("\n"),
                     role: "Error",
                 });
+                setIsSubmitting(false);
                 return;
             }
 
-            // Prepare payload
             const payload = {
                 name: nameStr,
                 email: emailStr,
@@ -97,33 +101,30 @@ const TeacherScreen = () => {
                 gender: genderStr === "true",
             };
 
-            // send to backend (useFetchSupabase signature assumed to accept method and payload)
-            useInsertSupabase("teacher", payload)
-                .then((res: any) => {
-                    const { error } = res || {};
-                    if (error) {
-                        AlertBox({ text: String(error?.message ?? error), role: "Error" });
-                    } else {
-                        AlertBox({ text: "Teacher added successfully.", role: 'Done' });
-                        // reset form, close dialog and refresh data
-                        (event.currentTarget as HTMLFormElement).reset();
-                        setShowForm(false);
-                        getData();
-                        navigate("/");
-                    }
-                })
-                .catch((err: any) => {
-                    AlertBox({ text: String(err), role: "Error" });
-                });
-            
-            window.location.reload();
-        } catch (err: any) {
-            console.log(err)
-            AlertBox({
-                text: String(err),
-                role: 'Error',
+            // Await insert so we don't reload/cancel request prematurely
+            const res: any = await useInsertSupabase("teacher", payload);
+            const { error } = res || {};
+            if (error) {
+                AlertBox({ text: String(error?.message ?? error), role: "Error" });
+                setIsSubmitting(false);
+                return;
+            }
 
-            })
+            AlertBox({ text: "Teacher added successfully.", role: 'Done' });
+            // Reset controlled inputs
+            setName("");
+            setEmail("");
+            setNumber("");
+            setSubject("");
+            setImage_url("");
+            setGender(undefined);
+            setShowForm(false);
+            await getData();
+        } catch (err: any) {
+            console.error(err)
+            AlertBox({ text: String(err), role: 'Error' })
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -136,54 +137,73 @@ const TeacherScreen = () => {
             <section className='h-20 w-full flex items-center justify-between'>
                 {showForm && (<DiaLogsFormsComponent isOpen={showForm}>
                     <form onSubmit={handleSubmit} id="subscription-form">
-                        <div className='flex items-start md:items-center md:flex-row flex-col justify-center my-2'>
+                        <div className='flex flex-col items-start md:items-start md:flex-row justify-center my-2'>
                             <label htmlFor="name" className="w-1/4 text-lg font-semibold">
                                 Name:
                             </label>
-                            <input required type="text" value={name.toString()} onChange={(e)=> setName(e.target.value)} className='w-full border rounded-md p-3' name='name' placeholder='please enter name' /><br />
+                            <div className='w-full'>
+                                <input type="text" value={name} onChange={(e)=> { setName(e.target.value); setErrors(prev => ({...prev, name: undefined})); }} className='w-full border rounded-md p-3' name='name' placeholder='please enter name' />
+                                {errors.name && <p className='text-red-600 text-sm mt-1 pl-1'>{errors.name}</p>}
+                            </div>
                         </div>
-                        <div className='flex items-start md:items-center md:flex-row flex-col justify-center my-2'>
-                            <label htmlFor="name" className="w-1/4 text-lg font-semibold">
+                        <div className='flex flex-col items-start md:items-start md:flex-row justify-center my-2'>
+                            <label htmlFor="email" className="w-1/4 text-lg font-semibold">
                                 Email:
                             </label>
-                            <input required type="email" value={email.toString()} onChange={(e)=> setEmail(e.target.value)} className='w-full border rounded-md p-3' name='email' placeholder='please enter email' /><br />
+                            <div className='w-full'>
+                                <input type="email" value={email} onChange={(e)=> { setEmail(e.target.value); setErrors(prev => ({...prev, email: undefined})); }} className='w-full border rounded-md p-3' name='email' placeholder='please enter email' />
+                                {errors.email && <p className='text-red-600 text-sm mt-1 pl-1'>{errors.email}</p>}
+                            </div>
                         </div>
-                        <div className='flex items-start md:items-center md:flex-row flex-col justify-center my-2'>
-                            <label htmlFor="name" className="w-1/4 text-lg font-semibold">
+                        <div className='flex flex-col items-start md:items-start md:flex-row justify-center my-2'>
+                            <label htmlFor="number" className="w-1/4 text-lg font-semibold">
                                 Number:
                             </label>
-                            <input required type="number" value={number.toString()} onChange={(e)=> setNumber(e.target.value)} className='w-full border rounded-md p-3' name='number' placeholder='please enter number' /><br />
+                            <div className='w-full'>
+                                <input type="text" value={number} onChange={(e)=> { setNumber(e.target.value); setErrors(prev => ({...prev, number: undefined})); }} className='w-full border rounded-md p-3' name='number' placeholder='please enter number' />
+                                {errors.number && <p className='text-red-600 text-sm mt-1 pl-1'>{errors.number}</p>}
+                            </div>
                         </div>
-                        <div className='flex items-start md:items-center md:flex-row flex-col justify-center my-2'>
-                            <label htmlFor="name" className="w-1/4 text-lg font-semibold">
+                        <div className='flex flex-col items-start md:items-start md:flex-row justify-center my-2'>
+                            <label htmlFor="subject" className="w-1/4 text-lg font-semibold">
                                 Subject:
                             </label>
-                            <input required type="text" value={subject.toString()} onChange={(e)=> setSubject(e.target.value)} className='w-full border rounded-md p-3' name='subject' placeholder='please enter subject name' /><br />
+                            <div className='w-full'>
+                                <input type="text" value={subject} onChange={(e)=> { setSubject(e.target.value); setErrors(prev => ({...prev, subject: undefined})); }} className='w-full border rounded-md p-3' name='subject' placeholder='please enter subject name' />
+                                {errors.subject && <p className='text-red-600 text-sm mt-1 pl-1'>{errors.subject}</p>}
+                            </div>
                         </div>
-                        <div className='flex items-start md:items-center md:flex-row flex-col justify-center my-2'>
-                            <label htmlFor="name" className="w-1/4 text-lg font-semibold">
+                        <div className='flex flex-col items-start md:items-start md:flex-row justify-center my-2'>
+                            <label htmlFor="image_url" className="w-1/4 text-lg font-semibold">
                                 Image Url:
                             </label>
-                            <input required value={image_url.toString()} onChange={(e)=> setImage_url(e.target.value)} type="text" className='w-full border rounded-md p-3' name='image_url' placeholder='please enter iamge url' /><br />
+                            <div className='w-full'>
+                                <input value={image_url} onChange={(e)=> { setImage_url(e.target.value); setErrors(prev => ({...prev, image_url: undefined})); }} type="text" className='w-full border rounded-md p-3' name='image_url' placeholder='please enter image url' />
+                                {errors.image_url && <p className='text-red-600 text-sm mt-1 pl-1'>{errors.image_url}</p>}
+                            </div>
                         </div>
-                        <div className='flex items-start md:items-center md:flex-row flex-col justify-center my-2'>
-                            <label htmlFor="name" className="w-1/4 text-lg font-semibold">
-                                Gender:
-                            </label>
-                            <select 
-                                value={gender?.toString()} 
-                                onChange={(e) => setGender(e.target.value === "true")} 
-                                className='w-full border rounded-md p-3' 
-                                name='gender'
-                                required
-                            >
-                                <option value="">Select Gender</option>
-                                <option value="true">Male</option>
-                                <option value="false">Female</option>
-                            </select><br />
+                        <div className='flex flex-col items-start md:items-start md:flex-row justify-center my-2'>
+                            <label htmlFor="gender" className="w-1/4 text-lg font-semibold">Gender:</label>
+                            <div className='w-full'>
+                                <select
+                                    value={gender === undefined ? "" : String(gender)}
+                                    onChange={(e) => { setGender(e.target.value === "true"); setErrors(prev => ({...prev, gender: undefined})); }}
+                                    className='w-full border rounded-md p-3'
+                                    name='gender'
+                                >
+                                    <option value="">Select Gender</option>
+                                    <option value="true">Male</option>
+                                    <option value="false">Female</option>
+                                </select>
+                                {errors.gender && <p className='text-red-600 text-sm mt-1 pl-1'>{errors.gender}</p>}
+                            </div>
                         </div>
-                        <button className='bg-sky-500 text-white p-2 rounded-md cursor-pointer'>
-                            Add now
+                        <button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className={`bg-sky-500 text-white p-2 rounded-md ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                        >
+                            {isSubmitting ? 'Adding...' : 'Add now'}
                         </button>
                     </form>
                 </DiaLogsFormsComponent>)}

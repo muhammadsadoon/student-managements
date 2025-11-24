@@ -1,5 +1,4 @@
 import * as React from 'react';
-import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
@@ -10,7 +9,6 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
 import { Link } from 'react-router-dom';
 // react icons imports
 import { MdOutlineEmojiEvents } from "react-icons/md";
@@ -21,7 +19,6 @@ import { IoSettingsOutline } from "react-icons/io5";
 import { MdOutlineClass } from "react-icons/md";
 import { FcAbout, } from "react-icons/fc";
 import { AiOutlineMenu } from 'react-icons/ai'
-import Avatar from '@mui/material/Avatar';
 import { UserContext } from '../../utils/contextApi';
 import type { CheckAuthRole } from '../../utils/types/checkAuthType';
 import Tooltip from '@mui/material/Tooltip';

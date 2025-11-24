@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { MdNotificationsNone } from 'react-icons/md'
 import { logoutFromSupabase } from '../../../utils/supabase-client'
 import { UserContext } from '../../../utils/contextApi'
