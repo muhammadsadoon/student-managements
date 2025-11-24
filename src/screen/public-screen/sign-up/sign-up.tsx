@@ -11,7 +11,7 @@ const SignUpScreen = () => {
   const [name, setName] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  let temp = 0;
+  let temp: NodeJS.Timeout | null = null;
   const navigate = useNavigate();
 
   const handleSubmitForm = async () => {
@@ -70,7 +70,7 @@ const SignUpScreen = () => {
         throw "please fill all input fields!"
       }
     } catch (err: any) {
-      clearTimeout(temp);
+      if (temp) clearTimeout(temp);
       setShowMassage({
         text: err,
         role: "Error"

@@ -8,20 +8,10 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import type { TableSearchType, TeacherGettingDataType } from '../../utils/types/propes';
-import { UserContext } from '../../utils/contextApi';
 import { useFetchSupabase } from '../../hooks/useFetch';
 import Skeleton from '@mui/material/Skeleton';
 import { Link } from 'react-router-dom';
 
-function createData(
-    name: string,
-    calories: number,
-    fat: number,
-    carbs: number,
-    protein: number,
-) {
-    return { name, calories, fat, carbs, protein };
-}
 
 
 export default function TableComponent({ search }: TableSearchType) {

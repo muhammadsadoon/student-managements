@@ -13,7 +13,7 @@ const LoginScreen = () => {
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
     const [isConfirmedTerms, setIsConfirmedTerms] = useState<boolean>(false);
-    let temp = 0;
+    let temp: NodeJS.Timeout | null = null;
     const navigate = useNavigate();
     const handleSubmitForm = async () => {
         try {
@@ -67,7 +67,7 @@ const LoginScreen = () => {
                 throw "please fill all input fields!"
             }
         } catch (err: any) {
-            clearTimeout(temp);
+            if (temp) clearTimeout(temp);
             setShowMassage({
                 text: err,
                 role: "Error"

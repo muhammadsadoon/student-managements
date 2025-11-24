@@ -9,7 +9,6 @@ import { useFetchSupabase, useInsertSupabase } from '../../../hooks/useFetch';
 import DiaLogsFormsComponent from '../../../components/dialogs/dialogs';
 import { logoutFromSupabase } from '../../../utils/supabase-client';
 import AlertBox from '../../../components/alert-box/alert-box';
-import { useNavigate } from 'react-router-dom';
 
 const TeacherScreen = () => {
     const [searchInput, setSearchInput] = useState("");
@@ -24,8 +23,6 @@ const TeacherScreen = () => {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [errors, setErrors] = useState<Record<string, string | undefined>>({})
     const context = useContext(UserContext);
-
-    const navigate = useNavigate();
 
     const filturData: TeacherGettingDataType[] = arr.filter(teacher => {
         if (!searchInput) return true;
